@@ -1,0 +1,71 @@
+[package]
+name = "note-to-myself"
+version = "0.1.0"
+edition = "2021"
+description = "Note to Myself — a tiny, fast note-taking app"
+authors = ["yolezz"]
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+iced = "0.13.1"
+lucide-icons = { version = "=0.501.0", features = ["iced"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+chrono = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+directories = "5"
+rfd = "0.15"
+
+# `cargo run` en debug rendait iced/wgpu/cosmic-text 10 à 50 fois plus lents
+# (freezes) et faisait paniquer cosmic-text sur un dépassement d'entier que la
+# version release ignore silencieusement. On optimise donc les dépendances.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+debug = false
+overflow-checks = false
+debug-assertions = false
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
+
+# --- Paquets (voir build.sh) -------------------------------------------------
+[package.metadata.deb]
+name = "note-to-myself"
+section = "utils"
+priority = "optional"
+depends = "$auto, libxkbcommon0, libwayland-client0, libvulkan1 | libgl1"
+extended-description = "A tiny note-taking app: write, search, edit and delete notes, in 20 languages."
+assets = [
+    ["target/release/note-to-myself", "usr/bin/note-to-myself", "755"],
+    ["packaging/note-to-myself.desktop", "usr/share/applications/note-to-myself.desktop", "644"],
+    ["packaging/icons/note-to-myself-16.png", "usr/share/icons/hicolor/16x16/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-24.png", "usr/share/icons/hicolor/24x24/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-32.png", "usr/share/icons/hicolor/32x32/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-48.png", "usr/share/icons/hicolor/48x48/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-64.png", "usr/share/icons/hicolor/64x64/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-128.png", "usr/share/icons/hicolor/128x128/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-256.png", "usr/share/icons/hicolor/256x256/apps/note-to-myself.png", "644"],
+    ["packaging/icons/note-to-myself-512.png", "usr/share/icons/hicolor/512x512/apps/note-to-myself.png", "644"],
+]
+
+[package.metadata.generate-rpm]
+name = "note-to-myself"
+summary = "A tiny note-taking app"
+assets = [
+{ source = "target/release/note-to-myself", dest = "/usr/bin/note-to-myself", mode = "0755" },
+{ source = "packaging/note-to-myself.desktop", dest = "/usr/share/applications/note-to-myself.desktop", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-16.png", dest = "/usr/share/icons/hicolor/16x16/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-24.png", dest = "/usr/share/icons/hicolor/24x24/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-32.png", dest = "/usr/share/icons/hicolor/32x32/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-48.png", dest = "/usr/share/icons/hicolor/48x48/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-64.png", dest = "/usr/share/icons/hicolor/64x64/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-128.png", dest = "/usr/share/icons/hicolor/128x128/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-256.png", dest = "/usr/share/icons/hicolor/256x256/apps/note-to-myself.png", mode = "0644" },
+{ source = "packaging/icons/note-to-myself-512.png", dest = "/usr/share/icons/hicolor/512x512/apps/note-to-myself.png", mode = "0644" },
+]
