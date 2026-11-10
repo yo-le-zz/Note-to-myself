@@ -1,0 +1,5 @@
+id = "daily-note"
+name = "Daily note"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Daily note button on the home screen that creates today's note once."

@@ -5,6 +5,7 @@
 #          ./build.sh deb        -> binaire + .deb seulement
 #          ./build.sh rpm        -> binaire + .rpm seulement
 #          ./build.sh bin        -> binaire seulement
+#          ./build.sh arch       -> paquet Arch Linux (.pkg.tar.zst), nécessite makepkg et git
 #          ./build.sh --test ... -> lance aussi les tests avant de compiler
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -14,8 +15,8 @@ TARGETS=()
 for arg in "$@"; do
   case "$arg" in
     --test) RUN_TESTS=1 ;;
-    deb|rpm|bin|all) TARGETS+=("$arg") ;;
-    -h|--help) sed -n '2,9p' "$0"; exit 0 ;;
+    deb|rpm|arch|bin|all) TARGETS+=("$arg") ;;
+    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
     *) echo "Argument inconnu : $arg (voir ./build.sh --help)" >&2; exit 1 ;;
   esac
 done
@@ -56,6 +57,17 @@ if want rpm; then
   ensure_tool generate-rpm cargo-generate-rpm
   echo "==> Paquet .rpm"
   cargo generate-rpm -o "dist/${NAME}-${VERSION}-1.x86_64.rpm" >/dev/null
+fi
+
+if [ "${TARGETS[*]}" = "arch" ] || { want arch && [ "${TARGETS[*]}" != "all" ]; }; then
+  command -v makepkg >/dev/null || { echo "makepkg est introuvable : ce paquet se construit sur Arch Linux" >&2; exit 1; }
+  echo "==> Paquet Arch Linux"
+  build_dir=$(mktemp -d)
+  git archive --prefix="$NAME-$VERSION/" -o "$build_dir/$NAME-$VERSION.tar.gz" HEAD
+  cp packaging/arch/PKGBUILD "$build_dir/"
+  (cd "$build_dir" && makepkg --noconfirm --nocheck >/dev/null)
+  cp "$build_dir"/*.pkg.tar.zst dist/
+  rm -rf "$build_dir"
 fi
 
 (cd dist && sha256sum * > SHA256SUMS)

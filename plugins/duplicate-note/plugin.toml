@@ -1,0 +1,5 @@
+id = "duplicate-note"
+name = "Duplicate note"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Duplicate entry to every note menu."

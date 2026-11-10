@@ -1,0 +1,5 @@
+id = "quick-theme"
+name = "Quick theme"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds Dark and Light buttons on the home screen to switch theme in one click."

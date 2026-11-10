@@ -1,0 +1,5 @@
+id = "password-generator"
+name = "Password generator"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Password button that inserts a random 20-character password."

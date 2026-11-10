@@ -1,0 +1,5 @@
+id = "startup-count"
+name = "Startup summary"
+version = "1.0.0"
+author = "yolezz"
+description = "Shows how many notes you have when the app starts."

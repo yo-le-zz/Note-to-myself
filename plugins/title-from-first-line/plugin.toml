@@ -1,0 +1,5 @@
+id = "title-from-first-line"
+name = "Title from first line"
+version = "1.0.0"
+author = "yolezz"
+description = "Gives untitled notes a title taken from the first line of their text."

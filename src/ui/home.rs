@@ -1,160 +1,136 @@
 use iced::widget::{button, column, container, row, text};
-use iced::{Alignment, Border, Color, Element, Length, Theme};
-use lucide_icons::iced::{icon_eye, icon_moon, icon_settings, icon_square_pen, icon_sun};
+use iced::{Alignment, Element, Length, Theme};
+use lucide_icons::iced::{
+    icon_eye, icon_lock, icon_moon, icon_settings, icon_square_pen, icon_sun,
+};
+use ntm_core::plugin::host::Zone;
 
-use crate::app::{App, Message};
+use super::style::{pal, Pal};
+use crate::app::{App, Message, PluginCall};
 
-const ORANGE: Color = Color::from_rgb(0.85, 0.32, 0.16);
-const BLACK: Color = Color::from_rgb(0.04, 0.04, 0.04);
-const WHITE: Color = Color::WHITE;
-const MUTED: Color = Color::from_rgb(0.55, 0.55, 0.55);
+fn tile<'a>(
+    p: Pal,
+    icon: Element<'a, Message>,
+    title: String,
+    subtitle: String,
+    message: Message,
+) -> Element<'a, Message> {
+    let content = column![icon, p.label(title, 16), p.muted(subtitle, 11)]
+        .spacing(7)
+        .align_x(Alignment::Center);
+    button(
+        container(content)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .center_x(Length::Fill)
+            .center_y(Length::Fill),
+    )
+    .width(150)
+    .height(112)
+    .style(p.button_style(true))
+    .on_press(message)
+    .into()
+}
+
+fn round_button<'a>(p: Pal, icon: Element<'a, Message>, message: Message) -> Element<'a, Message> {
+    button(
+        container(icon)
+            .center_x(Length::Fill)
+            .center_y(Length::Fill),
+    )
+    .width(40)
+    .height(40)
+    .style(move |theme: &Theme, status| {
+        let mut style = p.button_style(false)(theme, status);
+        style.border.radius = 20.0.into();
+        style
+    })
+    .on_press(message)
+    .into()
+}
+
+pub fn plugin_buttons<'a>(app: &'a App, p: Pal, zone: Zone) -> Element<'a, Message> {
+    let mut buttons = row![].spacing(8).align_y(Alignment::Center);
+    for b in app.plugin_buttons.iter().filter(|b| b.zone == zone) {
+        buttons = buttons.push(p.button(
+            p.label(b.label.clone(), 13),
+            [6, 12],
+            Some(Message::PluginCall(PluginCall {
+                plugin_id: b.plugin_id.clone(),
+                callback: b.callback.clone(),
+                note_uid: None,
+            })),
+        ));
+    }
+    buttons.into()
+}
 
 pub fn view(app: &App) -> Element<'_, Message> {
-    let dark = app.settings.dark_mode;
-    let fg = if dark { WHITE } else { BLACK };
-    let bg = if dark { BLACK } else { WHITE };
-    let card = if dark {
-        Color::from_rgb(0.10, 0.10, 0.10)
-    } else {
-        Color::from_rgb(0.97, 0.97, 0.97)
-    };
+    let p = pal(app);
+    let dark = app.palette().dark;
+    let accent = p.accent;
 
-    let new_content = column![
-        icon_square_pen().size(25).color(ORANGE),
-        text(app.t("new")).size(16).color(fg),
-        text(app.t("write_something")).size(11).color(MUTED),
-    ]
-    .spacing(7)
-    .align_x(Alignment::Center);
-
-    let new_button = button(
-        container(new_content)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .center_x(Length::Fill)
-            .center_y(Length::Fill),
-    )
-    .width(150)
-    .height(112)
-    .style(move |_theme: &Theme, status| {
-        let hovered = matches!(status, button::Status::Hovered);
-        button::Style {
-            background: Some(card.into()),
-            text_color: fg,
-            border: Border {
-                color: ORANGE,
-                width: if hovered { 2.0 } else { 1.0 },
-                radius: 14.0.into(),
-            },
-            ..Default::default()
-        }
-    })
-    .on_press(Message::NewNote);
-
-    let see_content = column![
-        icon_eye().size(25).color(ORANGE),
-        text(app.t("see")).size(16).color(fg),
-        text(app.t("your_notes")).size(11).color(MUTED),
-    ]
-    .spacing(7)
-    .align_x(Alignment::Center);
-
-    let see_button = button(
-        container(see_content)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .center_x(Length::Fill)
-            .center_y(Length::Fill),
-    )
-    .width(150)
-    .height(112)
-    .style(move |_theme: &Theme, status| {
-        let hovered = matches!(status, button::Status::Hovered);
-        button::Style {
-            background: Some(card.into()),
-            text_color: fg,
-            border: Border {
-                color: ORANGE,
-                width: if hovered { 2.0 } else { 1.0 },
-                radius: 14.0.into(),
-            },
-            ..Default::default()
-        }
-    })
-    .on_press(Message::SeeNotes);
+    let new_tile = tile(
+        p,
+        icon_square_pen().size(25).color(accent).into(),
+        app.t("new"),
+        app.t("write_something"),
+        Message::NewNote,
+    );
+    let see_tile = tile(
+        p,
+        icon_eye().size(25).color(accent).into(),
+        app.t("see"),
+        app.t("your_notes"),
+        Message::SeeNotes,
+    );
 
     let theme_icon = if dark { icon_moon() } else { icon_sun() };
+    let mut top = row![
+        round_button(
+            p,
+            theme_icon.size(20).color(accent).into(),
+            Message::ToggleTheme(!dark)
+        ),
+        round_button(
+            p,
+            icon_settings().size(20).color(accent).into(),
+            Message::OpenSettings
+        ),
+    ]
+    .spacing(8)
+    .align_y(Alignment::Center);
+    if app.settings.security.enabled {
+        top = top.push(round_button(
+            p,
+            icon_lock().size(20).color(accent).into(),
+            Message::LockNow,
+        ));
+    }
 
-    let theme_button = button(
-        container(theme_icon.size(20).color(ORANGE))
-            .center_x(Length::Fill)
-            .center_y(Length::Fill),
-    )
-    .width(40)
-    .height(40)
-    .style(move |_theme: &Theme, status| {
-        let hovered = matches!(status, button::Status::Hovered);
-        button::Style {
-            background: Some(bg.into()),
-            text_color: ORANGE,
-            border: Border {
-                color: ORANGE,
-                width: if hovered { 2.0 } else { 1.0 },
-                radius: 20.0.into(),
-            },
-            ..Default::default()
-        }
-    })
-    .on_press(Message::ToggleTheme(!dark));
+    let mut center = column![row![new_tile, see_tile]
+        .spacing(14)
+        .align_y(Alignment::Center)]
+    .spacing(18)
+    .align_x(Alignment::Center);
+    center = center.push(plugin_buttons(app, p, Zone::Home));
+    if !app.status.is_empty() {
+        center = center.push(
+            text(app.status.clone())
+                .size(12)
+                .color(p.accent)
+                .font(p.font),
+        );
+    }
 
-    let config_button = button(
-        container(icon_settings().size(20).color(ORANGE))
-            .center_x(Length::Fill)
-            .center_y(Length::Fill),
-    )
-    .width(40)
-    .height(40)
-    .style(move |_theme: &Theme, status| {
-        let hovered = matches!(status, button::Status::Hovered);
-        button::Style {
-            background: Some(bg.into()),
-            text_color: ORANGE,
-            border: Border {
-                color: ORANGE,
-                width: if hovered { 2.0 } else { 1.0 },
-                radius: 20.0.into(),
-            },
-            ..Default::default()
-        }
-    })
-    .on_press(Message::OpenSettings);
-
-    let top_buttons = row![theme_button, config_button]
-        .spacing(8)
-        .align_y(Alignment::Center);
-
-    let top_left = container(top_buttons)
+    let top_left = container(top)
         .padding(12)
         .width(Length::Fill)
         .align_x(Alignment::Start);
-
-    let center = container(
-        row![new_button, see_button]
-            .spacing(14)
-            .align_y(Alignment::Center),
-    )
-    .width(Length::Fill)
-    .height(Length::Fill)
-    .center_x(Length::Fill)
-    .center_y(Length::Fill);
-
-    container(iced::widget::stack![center, top_left])
+    let center = container(center)
         .width(Length::Fill)
         .height(Length::Fill)
-        .style(move |_theme| container::Style {
-            background: Some(bg.into()),
-            text_color: Some(fg),
-            ..Default::default()
-        })
-        .into()
+        .center_x(Length::Fill)
+        .center_y(Length::Fill);
+    p.page(iced::widget::stack![center, top_left])
 }

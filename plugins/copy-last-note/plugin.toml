@@ -1,0 +1,5 @@
+id = "copy-last-note"
+name = "Copy last note"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Copy last button on the home screen that puts your newest note on the clipboard."

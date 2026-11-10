@@ -1,0 +1,115 @@
+name: Release
+
+# Lancé quand un tag vX.Y.Z est poussé : compile et publie .deb, .rpm, paquet Arch Linux,
+# exécutable et installateur Windows, avec les sommes SHA-256.
+on:
+  push:
+    tags: ['v*']
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag must match Cargo.toml
+        id: version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          [ "v$version" = "${GITHUB_REF_NAME}" ] || { echo "tag ${GITHUB_REF_NAME} does not match Cargo.toml version $version"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  linux:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev libvulkan-dev pkg-config
+      - name: Tests
+        run: cargo test --locked
+      - name: Packages
+        run: ./build.sh deb rpm
+      - uses: actions/upload-artifact@v7
+        with:
+          name: linux
+          path: dist/*
+
+  arch:
+    needs: verify
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm base-devel git cargo libxkbcommon wayland vulkan-icd-loader
+      - uses: actions/checkout@v7
+      - name: Build the Arch package
+        run: |
+          set -euo pipefail
+          version='${{ needs.verify.outputs.version }}'
+          useradd -m builder
+          workdir=/home/builder/build
+          mkdir -p "$workdir"
+          # Archive du dépôt : makepkg construit exactement ce qui est dans le tag.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git archive --prefix="note-to-myself-$version/" -o "$workdir/note-to-myself-$version.tar.gz" HEAD
+          cp packaging/arch/PKGBUILD "$workdir/"
+          chown -R builder:builder "$workdir"
+          su builder -c "cd $workdir && makepkg --noconfirm --nocheck"
+          mkdir -p dist && cp "$workdir"/*.pkg.tar.zst dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: arch
+          path: dist/*
+
+  windows:
+    needs: verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Tests
+        run: cargo test --locked
+      - name: Build
+        run: cargo build --release --locked
+      - name: Installer
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=${{ needs.verify.outputs.version }}" packaging\windows\note-to-myself.iss
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          $v = "${{ needs.verify.outputs.version }}"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path target\release\note-to-myself.exe, target\release\ntm-plugin-check.exe, LICENSE -DestinationPath "dist\note-to-myself-$v-windows-portable.zip"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: dist/*
+
+  publish:
+    needs: [linux, arch, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums
+        run: cd artifacts && sha256sum * > SHA256SUMS
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/*
+          generate_release_notes: true

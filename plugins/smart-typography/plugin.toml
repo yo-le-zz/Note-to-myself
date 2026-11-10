@@ -1,0 +1,5 @@
+id = "smart-typography"
+name = "Smart typography"
+version = "1.0.0"
+author = "yolezz"
+description = "Replaces three dots with an ellipsis and spaced double hyphens with a dash when saving."

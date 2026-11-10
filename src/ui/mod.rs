@@ -1,4 +1,10 @@
 pub mod config;
 pub mod home;
+pub mod lock;
 pub mod notes;
+pub mod plugins;
+pub mod security;
+pub mod style;
+pub mod sync;
+pub mod themes;
 pub mod write;

@@ -1,0 +1,5 @@
+id = "word-counter"
+name = "Word counter"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Stats button on the notes screen: number of notes, words and characters."

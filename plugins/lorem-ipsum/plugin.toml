@@ -1,0 +1,5 @@
+id = "lorem-ipsum"
+name = "Lorem ipsum"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Lorem button that inserts placeholder text."

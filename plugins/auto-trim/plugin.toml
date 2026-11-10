@@ -1,0 +1,5 @@
+id = "auto-trim"
+name = "Auto trim"
+version = "1.0.0"
+author = "yolezz"
+description = "Removes trailing spaces and collapses long runs of blank lines every time a note is saved."

@@ -1,0 +1,42 @@
+# Maintainer: yolezz
+# Construit le paquet depuis une archive du dépôt (voir build.sh arch, ou le workflow de release).
+pkgname=note-to-myself
+pkgver=1.1.0
+pkgrel=1
+pkgdesc='A tiny, fast, private note-taking app with encryption, themes, sync and plugins'
+arch=('x86_64')
+url='https://github.com/yo-le-zz/Note-to-myself'
+license=('MIT')
+depends=('libxkbcommon' 'wayland' 'vulkan-icd-loader' 'gcc-libs')
+makedepends=('cargo')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  export CARGO_TARGET_DIR=target
+  cargo build --release --locked --bin note-to-myself --bin ntm-plugin-check
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  export CARGO_TARGET_DIR=target
+  cargo test --release --locked --lib
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 "target/release/note-to-myself" "$pkgdir/usr/bin/note-to-myself"
+  install -Dm755 "target/release/ntm-plugin-check" "$pkgdir/usr/bin/ntm-plugin-check"
+  install -Dm644 packaging/note-to-myself.desktop "$pkgdir/usr/share/applications/note-to-myself.desktop"
+  for size in 16 24 32 48 64 128 256 512; do
+    install -Dm644 "packaging/icons/note-to-myself-$size.png" \
+      "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/note-to-myself.png"
+  done
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
