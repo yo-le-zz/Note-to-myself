@@ -1,0 +1,5 @@
+id = "note-statistics"
+name = "Note statistics"
+version = "1.0.0"
+author = "yolezz"
+description = "A panel with your writing statistics: totals, averages, longest notes and most used words."

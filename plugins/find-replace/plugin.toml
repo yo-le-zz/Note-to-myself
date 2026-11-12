@@ -1,0 +1,5 @@
+id = "find-replace"
+name = "Find and replace"
+version = "1.0.0"
+author = "yolezz"
+description = "A panel to count and replace text in all your notes or in the note being edited, with a safety switch."

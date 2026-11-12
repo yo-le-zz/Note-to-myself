@@ -1,0 +1,5 @@
+id = "checklist"
+name = "Checklist"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Checklist button that inserts a task item in the editor."

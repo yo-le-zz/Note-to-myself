@@ -1,0 +1,5 @@
+id = "random-note"
+name = "Random note"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Random button on the notes screen that shows the title of a random note."

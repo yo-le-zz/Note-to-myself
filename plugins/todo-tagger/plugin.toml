@@ -1,0 +1,5 @@
+id = "todo-tagger"
+name = "TODO tagger"
+version = "1.0.0"
+author = "yolezz"
+description = "Prefixes the title with [TODO] when the text of a note contains TODO."

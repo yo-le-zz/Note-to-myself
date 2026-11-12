@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Note to Myself
+GenericName=Notes
+Comment=A thought, just for yourself.
+Comment[fr]=Une pensée, rien que pour toi.
+Exec=note-to-myself
+Icon=note-to-myself
+Terminal=false
+Categories=Utility;TextEditor;
+Keywords=notes;memo;write;
+StartupWMClass=note-to-myself

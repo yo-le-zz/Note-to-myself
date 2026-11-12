@@ -1,0 +1,5 @@
+id = "reading-time"
+name = "Reading time"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Reading time button that estimates how long the current note takes to read."

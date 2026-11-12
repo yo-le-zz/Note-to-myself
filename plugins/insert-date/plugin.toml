@@ -1,0 +1,5 @@
+id = "insert-date"
+name = "Insert date and time"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds Date and Time buttons to the editor."

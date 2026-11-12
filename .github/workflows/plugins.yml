@@ -1,0 +1,32 @@
+name: Plugins
+
+# Vérifie chaque plugin proposé par pull request : manifeste, syntaxe, constructions interdites,
+# permissions détectées dans le code. Le script n'est jamais exécuté avec des données réelles.
+on:
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - 'examples/**'
+      - 'src/plugin/**'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev libvulkan-dev pkg-config
+      - name: Build the checker
+        run: cargo build --locked --release --bin ntm-plugin-check
+      - name: Check every plugin folder
+        run: |
+          set -euo pipefail
+          folders=$(find plugins examples -mindepth 1 -maxdepth 2 -name plugin.toml -printf '%h\n' | sort)
+          [ -n "$folders" ] || { echo "no plugin found"; exit 1; }
+          ./target/release/ntm-plugin-check $folders
+      - name: Plugin tests (built-in plugins run against sample notes)
+        run: cargo test --locked --lib plugin

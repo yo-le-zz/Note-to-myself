@@ -1,0 +1,5 @@
+id = "snippets"
+name = "Snippets"
+version = "1.0.0"
+author = "yolezz"
+description = "Keep reusable pieces of text and insert them into the editor with one click."

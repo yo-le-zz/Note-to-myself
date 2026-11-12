@@ -1,0 +1,5 @@
+id = "word-goal"
+name = "Daily word goal"
+version = "1.0.0"
+author = "yolezz"
+description = "Set a daily writing goal and follow your progress with a bar. Counts the words of the notes you touched today."

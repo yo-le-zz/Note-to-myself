@@ -1,0 +1,5 @@
+id = "clean-empty-notes"
+name = "Clean empty notes"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds a Remove empty button on the notes screen that deletes notes with no title and no text."

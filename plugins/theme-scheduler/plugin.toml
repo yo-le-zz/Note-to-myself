@@ -1,0 +1,5 @@
+id = "theme-scheduler"
+name = "Theme scheduler"
+version = "1.0.0"
+author = "yolezz"
+description = "Switches theme automatically between a day theme and a night theme at the hours you choose."

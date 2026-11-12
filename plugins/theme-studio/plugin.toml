@@ -1,0 +1,5 @@
+id = "theme-studio"
+name = "Theme Studio"
+version = "1.0.0"
+author = "yolezz"
+description = "Create your own themes with live preview: HSL sliders, color harmonies, contrast checks, hex import, randomize, and one-click save. The whole app changes as you move the sliders."

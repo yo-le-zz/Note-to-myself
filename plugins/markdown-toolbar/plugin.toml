@@ -1,0 +1,5 @@
+id = "markdown-toolbar"
+name = "Markdown toolbar"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds heading, bold, italic, code, link, quote, list and task buttons to the editor."

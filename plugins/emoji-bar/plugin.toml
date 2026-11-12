@@ -1,0 +1,5 @@
+id = "emoji-bar"
+name = "Emoji bar"
+version = "1.0.0"
+author = "yolezz"
+description = "Adds quick emoji buttons to the editor."
